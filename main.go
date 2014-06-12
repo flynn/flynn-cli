@@ -62,6 +62,7 @@ var commands = []*Command{
 	cmdCreate,
 	cmdApps,
 	cmdPs,
+	cmdKill,
 	cmdLog,
 	cmdScale,
 	cmdRun,
