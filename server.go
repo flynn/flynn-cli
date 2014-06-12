@@ -15,7 +15,7 @@ var cmdServerAdd = &Command{
 	Run:      runServerAdd,
 	Usage:    "server-add [-g <githost>] [-p <tlspin>] <server-name> <url> <key>",
 	Short:    "add a server",
-	Long:     `Command add-server adds a server to the ~/.flynnrc configuration file`,
+	Long:     `Command server-add adds a server to the ~/.flynnrc configuration file`,
 	NoClient: true,
 }
 
