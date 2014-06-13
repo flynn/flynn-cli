@@ -4,32 +4,30 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"fmt"
 
+	"github.com/docopt/docopt-go"
 	"github.com/flynn/flynn-controller/client"
 	ct "github.com/flynn/flynn-controller/types"
 )
 
-var cmdScale = &Command{
-	Run:   runScale,
-	Usage: "scale [-r <release>] <type>=<qty>...",
-	Short: "change formation",
-	Long: `
+// takes args of the form "web=1", "worker=3", etc
+func runScale(argv []string, client *controller.Client) error {
+	usage := `usage: flynn scale [-r <release>] <type>=<qty>...
+
 Scale changes the number of jobs for each process type in a release.
+
+Options:
+  -r, --release <release>  id of release to scale (defaults to current app release)
 
 Example:
 
 	$ flynn scale web=2 worker=5
-`,
-}
+`
+	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-var scaleRelease string
+	scaleRelease := args["--release"].(string)
 
-func init() {
-	cmdScale.Flag.StringVarP(&scaleRelease, "release", "r", "", "id of release to scale (defaults to current app release)")
-}
-
-// takes args of the form "web=1", "worker=3", etc
-func runScale(cmd *Command, args []string, client *controller.Client) error {
 	if scaleRelease == "" {
 		release, err := client.GetAppRelease(mustApp())
 		if err == controller.ErrNotFound {
@@ -55,14 +53,14 @@ func runScale(cmd *Command, args []string, client *controller.Client) error {
 		formation.Processes = make(map[string]int)
 	}
 
-	for _, arg := range args {
+	for _, arg := range args["<type>=<qty>"].([]string) {
 		i := strings.IndexRune(arg, '=')
 		if i < 0 {
-			cmd.printUsage(true)
+			//cmd.printUsage(true)
 		}
 		val, err := strconv.Atoi(arg[i+1:])
 		if err != nil {
-			cmd.printUsage(true)
+			//cmd.printUsage(true)
 		}
 		formation.Processes[arg[:i]] = val
 	}

@@ -7,13 +7,14 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"text/tabwriter"
 
-	"github.com/BurntSushi/toml"
+	"github.com/docopt/docopt-go"
 	"github.com/bgentry/pflag"
+	"github.com/BurntSushi/toml"
 	"github.com/flynn/flynn-controller/client"
 )
 
@@ -58,15 +59,12 @@ func (c *Command) List() bool {
 
 // Running `flynn help` will list commands in this order.
 var commands = []*Command{
-	cmdServers,
 	cmdServerAdd,
-	cmdServerRemove,
 	cmdCreate,
-	cmdApps,
-	cmdPs,
-	cmdKill,
-	cmdLog,
-	cmdScale,
+	//cmdApps,
+	//cmdPs,
+	//cmdLog,
+	//cmdScale,
 	cmdRun,
 	cmdEnv,
 	cmdEnvSet,
@@ -81,8 +79,8 @@ var commands = []*Command{
 	cmdKeyAdd,
 	cmdKeyRemove,
 	cmdReleaseAddDocker,
-	cmdVersion,
-	cmdHelp,
+	//cmdVersion,
+	//cmdHelp,
 }
 
 var (
@@ -94,20 +92,65 @@ var (
 func main() {
 	log.SetFlags(0)
 
-	args := os.Args[1:]
+	usage := `usage: flynn [-a <app>] <command> [<args>...]
+
+	options:
+	   -a <app>
+	   -h, --help
+
+	commands:
+	   add        Add file contents to the index
+	   branch     List, create, or delete branches
+	   checkout   Checkout a branch or paths to the working tree
+	   clone      Clone a repository into a new directory
+	   commit     Record changes to the repository
+	   push       Update remote refs along with associated objects
+	   remote     Manage set of tracked repositories
+
+	   help                show usage for a specific command
+	   cluster             list clusters
+	   cluster-add         add a cluster
+	   cluster-remove      remove a cluster
+	   create              create an app
+	   apps                list apps
+	   ps                  list jobs
+	   kill                kill a job
+	   log                 get job log
+	   scale               change formation
+	   run                 run a job
+	   env                 list env vars
+	   env-set             set env vars
+	   env-get             get env var
+	   env-unset           unset env vars
+	   routes              list routes
+	   route-add-http      add a HTTP route
+	   route-remove        remove a route
+	   providers           list resource providers
+	   resource-add        provision a new resource
+	   keys                list ssh public keys
+	   key-add             add ssh public key
+	   key-remove          remove an ssh public key
+	   release-add-docker  add a docker image release
+	   version             show flynn version
+
+	See 'flynn help <command>' for more information on a specific command.
+	`
+	args, _ := docopt.Parse(usage, nil, true, Version, true)
+
+	cmd := args["<command>"].(string)
+	cmdArgs := args["<args>"].([]string)
 
 	// Run the update command as early as possible to avoid the possibility of
 	// installations being stranded without updates due to errors in other code
-	if len(args) > 0 && args[0] == cmdUpdate.Name() {
-		cmdUpdate.Run(cmdUpdate, args, nil)
+	if cmd == "update" {
+		//cmdUpdate.Run(cmdUpdate, args, nil)
 		return
 	} else if updater != nil {
 		defer updater.backgroundRun() // doesn't run if os.Exit is called
 	}
 
-	if len(args) >= 2 && "-a" == args[0] {
-		flagApp = args[1]
-		args = args[2:]
+	if args["-a"] != nil {
+		flagApp = args["-a"].(string)
 
 		if err := readConfig(); err != nil {
 			log.Fatal(err)
@@ -119,47 +162,61 @@ func main() {
 		}
 	}
 
-	if len(args) < 1 {
-		usage()
-	}
-
-	for _, cmd := range commands {
-		if cmd.Name() == args[0] && cmd.Run != nil {
-			cmd.Flag.Usage = func() {
-				cmd.printUsage(false)
-			}
-			if err := cmd.Flag.Parse(args[1:]); err != nil {
-				os.Exit(2)
-			}
-
-			var client *controller.Client
-			if !cmd.NoClient {
-				server, err := server()
-				if err != nil {
-					log.Fatal(err)
-				}
-				if server.TLSPin != "" {
-					pin, err := base64.StdEncoding.DecodeString(server.TLSPin)
-					if err != nil {
-						log.Fatalln("error decoding tls pin:", err)
-					}
-					client, err = controller.NewClientWithPin(server.URL, server.Key, pin)
-				} else {
-					client, err = controller.NewClient(server.URL, server.Key)
-				}
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
-			if err := cmd.Run(cmd, cmd.Flag.Args(), client); err != nil {
-				log.Fatal(err)
-			}
-			return
+	var client *controller.Client
+	//if !cmd.NoClient {
+		server, err := server()
+		if err != nil {
+			log.Fatal(err)
 		}
+		if server.TLSPin != "" {
+			pin, err := base64.StdEncoding.DecodeString(server.TLSPin)
+			if err != nil {
+				log.Fatalln("error decoding tls pin:", err)
+			}
+			client, err = controller.NewClientWithPin(server.URL, server.Key, pin)
+		} else {
+			client, err = controller.NewClient(server.URL, server.Key)
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+	//}
+
+	if err := runCommand(cmd, cmdArgs, client); err != nil {
+		log.Fatal(err)
+		return
+	}
+}
+
+func runCommand(cmd string, args []string, client *controller.Client) (err error) {
+	argv := make([]string, 1)
+	argv[0] = cmd
+	argv = append(argv, args...)
+
+	if cmd == "help" {
+		cmd = argv[1]
+
+		argv = make([]string, 1)
+		argv[0] = cmd
+		argv = append(argv, "--help")
 	}
 
-	fmt.Fprintf(os.Stderr, "Unknown command: %s\n", args[0])
-	usage()
+	switch cmd {
+	case "version":
+		return runVersion(argv, client)
+	case "apps":
+		return runApps(argv, client)
+	case "ps":
+		return runPs(argv, client)
+	case "scale":
+		return runScale(argv, client)
+	case "log":
+		return runLog(argv, client)
+	case "kill":
+		return runKill(argv, client)
+	}
+
+	return fmt.Errorf("%s is not a flynn command. See 'flynn --help'", cmd)
 }
 
 type Config struct {
