@@ -14,7 +14,7 @@ var cmdKill = &Command{
 }
 
 func runKill(cmd *Command, args []string, client *controller.Client) error {
-  if len(args) == 0 {
+  if len(args) != 1 {
     cmd.printUsage(true)
   }
 
@@ -23,6 +23,6 @@ func runKill(cmd *Command, args []string, client *controller.Client) error {
   if err := client.DeleteJob(mustApp(), job); err != nil {
     return err
   }
-  log.Printf("Key %s removed.", job)
+  log.Printf("Job %s killed.", job)
   return nil
 }

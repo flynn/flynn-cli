@@ -21,7 +21,7 @@ var cmdServers = &Command{
 }
 
 func runServers(cmd *Command, args []string, client *controller.Client) error {
-	if len(args) == 1 {
+	if len(args) != 0 {
 		cmd.printUsage(true)
 	}
 	if err := readConfig(); err != nil {
@@ -31,9 +31,9 @@ func runServers(cmd *Command, args []string, client *controller.Client) error {
 	w := tabWriter()
 	defer w.Flush()
 
-	listRec(w, "NAME", "URL", "KEY")
+	listRec(w, "NAME", "URL")
 	for _, s := range config.Servers {
-		listRec(w, s.Name, s.URL, s.Key)
+		listRec(w, s.Name, s.URL)
 	}
 	return nil
 }
