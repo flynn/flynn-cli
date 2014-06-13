@@ -81,3 +81,44 @@ func runServerAdd(cmd *Command, args []string, client *controller.Client) error 
 	log.Printf("Server %q added.", s.Name)
 	return nil
 }
+
+var cmdServerRemove = &Command{
+	Run:      runServerRemove,
+	Usage:    "server-remove <server-name>",
+	Short:    "remove a server",
+	Long:     `Command server-remove removes a server from the ~/.flynnrc configuration file`,
+	NoClient: true,
+}
+
+func runServerRemove(cmd *Command, args []string, client *controller.Client) error {
+	if len(args) != 1 {
+		cmd.printUsage(true)
+	}
+	if err := readConfig(); err != nil {
+		return err
+	}
+
+	name := args[0]
+
+	for i, s := range config.Servers {
+		if s.Name == name {
+			config.Servers = append(config.Servers[:i], config.Servers[i+1:]...)
+
+			f, err := os.Create(configPath())
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			if len(config.Servers) != 0 {
+				if err := toml.NewEncoder(f).Encode(config); err != nil {
+					return err
+				}
+			}
+
+			log.Printf("Server %q removed.", s.Name)
+			return nil
+		}
+	}
+	return nil
+}

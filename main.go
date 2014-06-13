@@ -59,6 +59,7 @@ func (c *Command) List() bool {
 // Running `flynn help` will list commands in this order.
 var commands = []*Command{
 	cmdServerAdd,
+	cmdServerRemove,
 	cmdCreate,
 	cmdApps,
 	cmdPs,
