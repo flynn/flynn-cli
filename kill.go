@@ -1,28 +1,22 @@
 package main
 
 import (
-  "log"
+	"log"
 
-  "github.com/flynn/flynn-controller/client"
+	"github.com/flynn/go-docopt"
+	"github.com/flynn/flynn-controller/client"
 )
 
-var cmdKill = &Command{
-  Run:   runKill,
-  Usage: "kill <job>",
-  Short: "kill a job",
-  Long:  `Kill a job`,
-}
+func runKill(argv []string, client *controller.Client) error {
+	usage := `usage: flynn kill <job>
 
-func runKill(cmd *Command, args []string, client *controller.Client) error {
-  if len(args) != 1 {
-    cmd.printUsage(true)
-  }
+Kill a job.`
+	args, _ := docopt.Parse(usage, argv, true, "", false)
+	job := args.String["<job>"]
 
-  job := args[0]
-
-  if err := client.DeleteJob(mustApp(), job); err != nil {
-    return err
-  }
-  log.Printf("Job %s killed.", job)
-  return nil
+	if err := client.DeleteJob(mustApp(), job); err != nil {
+		return err
+	}
+	log.Printf("Job %s killed.", job)
+	return nil
 }
