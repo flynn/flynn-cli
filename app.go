@@ -9,27 +9,16 @@ import (
 	ct "github.com/flynn/flynn-controller/types"
 )
 
-var cmdCreate = &Command{
-	Run:   runCreate,
-	Usage: "create [<name>]",
-	Short: "create an app",
-	Long:  `Create an application in Flynn`,
-}
-
 func runCreate(argv []string, client *controller.Client) error {
 	usage := `usage: flynn create [<name>]
 
-List flynn apps.
+Create an application in Flynn.
 	`
-	docopt.Parse(usage, argv, true, "", false)
-
-	if len(args) > 1 {
-		cmd.printUsage(true)
-	}
+	args, _ := docopt.Parse(usage, argv, true, "", false)
 
 	app := &ct.App{}
-	if len(args) > 0 {
-		app.Name = args[0]
+	if args["<name>"] != nil {
+		app.Name = args["<name>"].(string)
 	}
 
 	if err := client.CreateApp(app); err != nil {

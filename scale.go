@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"fmt"
 
 	"github.com/docopt/docopt-go"
 	"github.com/flynn/flynn-controller/client"
