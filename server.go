@@ -11,6 +11,34 @@ import (
 	"github.com/flynn/flynn-controller/client"
 )
 
+
+var cmdServers = &Command{
+	Run:      runServers,
+	Usage:    "servers",
+	Short:    "list servers",
+	Long:     `List all servers in the ~/.flynnrc configuration file`,
+	NoClient: true,
+}
+
+func runServers(cmd *Command, args []string, client *controller.Client) error {
+	if len(args) == 1 {
+		cmd.printUsage(true)
+	}
+	if err := readConfig(); err != nil {
+		return err
+	}
+
+	w := tabWriter()
+	defer w.Flush()
+
+	listRec(w, "NAME", "URL", "KEY")
+	for _, s := range config.Servers {
+		listRec(w, s.Name, s.URL, s.Key)
+	}
+	return nil
+}
+
+
 var cmdServerAdd = &Command{
 	Run:      runServerAdd,
 	Usage:    "server-add [-g <githost>] [-p <tlspin>] <server-name> <url> <key>",
