@@ -66,10 +66,10 @@ var commands = []*Command{
 	//cmdLog,
 	//cmdScale,
 	cmdRun,
-	cmdEnv,
-	cmdEnvSet,
-	cmdEnvGet,
-	cmdEnvUnset,
+	//cmdEnv,
+	//cmdEnvSet,
+	//cmdEnvGet,
+	//cmdEnvUnset,
 	cmdRoutes,
 	cmdRouteAddHTTP,
 	cmdRouteRemove,
@@ -94,46 +94,43 @@ func main() {
 
 	usage := `usage: flynn [-a <app>] <command> [<args>...]
 
-	options:
-	   -a <app>
-	   -h, --help
+Options:
+   -a <app>
+   -h, --help
 
-	commands:
-	   add        Add file contents to the index
-	   branch     List, create, or delete branches
-	   checkout   Checkout a branch or paths to the working tree
-	   clone      Clone a repository into a new directory
-	   commit     Record changes to the repository
-	   push       Update remote refs along with associated objects
-	   remote     Manage set of tracked repositories
+Commands:
+   add        Add file contents to the index
+   branch     List, create, or delete branches
+   checkout   Checkout a branch or paths to the working tree
+   clone      Clone a repository into a new directory
+   commit     Record changes to the repository
+   push       Update remote refs along with associated objects
+   remote     Manage set of tracked repositories
 
-	   help                show usage for a specific command
-	   cluster             list clusters
-	   cluster-add         add a cluster
-	   cluster-remove      remove a cluster
-	   create              create an app
-	   apps                list apps
-	   ps                  list jobs
-	   kill                kill a job
-	   log                 get job log
-	   scale               change formation
-	   run                 run a job
-	   env                 list env vars
-	   env-set             set env vars
-	   env-get             get env var
-	   env-unset           unset env vars
-	   routes              list routes
-	   route-add-http      add a HTTP route
-	   route-remove        remove a route
-	   providers           list resource providers
-	   resource-add        provision a new resource
-	   keys                list ssh public keys
-	   key-add             add ssh public key
-	   key-remove          remove an ssh public key
-	   release-add-docker  add a docker image release
-	   version             show flynn version
+   help                show usage for a specific command
+   cluster             list clusters
+   cluster-add         add a cluster
+   cluster-remove      remove a cluster
+   create              create an app
+   apps                list apps
+   ps                  list jobs
+   kill                kill a job
+   log                 get job log
+   scale               change formation
+   run                 run a job
+   env                 manage env variables
+   routes              list routes
+   route-add-http      add a HTTP route
+   route-remove        remove a route
+   providers           list resource providers
+   resource-add        provision a new resource
+   keys                list ssh public keys
+   key-add             add ssh public key
+   key-remove          remove an ssh public key
+   release-add-docker  add a docker image release
+   version             show flynn version
 
-	See 'flynn help <command>' for more information on a specific command.
+See 'flynn help <command>' for more information on a specific command.
 	`
 	args, _ := docopt.Parse(usage, nil, true, Version, true)
 
@@ -204,6 +201,8 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 	switch cmd {
 	case "version":
 		return runVersion(argv, client)
+	case "create":
+		return runCreate(argv, client)
 	case "apps":
 		return runApps(argv, client)
 	case "ps":
@@ -212,6 +211,8 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 		return runScale(argv, client)
 	case "log":
 		return runLog(argv, client)
+	case "env":
+		return runEnv(argv, client)
 	case "kill":
 		return runKill(argv, client)
 	}
