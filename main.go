@@ -72,9 +72,9 @@ var commands = []*Command{
 	//cmdEnvSet,
 	//cmdEnvGet,
 	//cmdEnvUnset,
-	cmdRoutes,
-	cmdRouteAddHTTP,
-	cmdRouteRemove,
+	//cmdRoutes,
+	//cmdRouteAddHTTP,
+	//cmdRouteRemove,
 	cmdProviders,
 	cmdResourceAdd,
 	//cmdKeys,
@@ -110,9 +110,7 @@ Commands:
    scale               change formation
    run                 run a job
    env                 manage env variables
-   routes              list routes
-   route-add-http      add a HTTP route
-   route-remove        remove a route
+   route               manage routes
    providers           list resource providers
    resource-add        provision a new resource
    key                 manage SSH public keys
@@ -212,6 +210,8 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 		return runKill(argv, client)
 	case "cluster":
 		return runCluster(argv, client)
+	case "route":
+		return runRoute(argv, client)
 	}
 
 	return fmt.Errorf("%s is not a flynn command. See 'flynn --help'", cmd)
