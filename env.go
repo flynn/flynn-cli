@@ -38,11 +38,11 @@ Commands:
 		envProc = args["--process-type"].(string)
 	}
 
-	if args["set"] != false {
+	if args["set"] == true {
 		return runEnvSet(args, client)
-	} else if args["unset"] != false {
+	} else if args["unset"] == true {
 		return runEnvUnset(args, client)
-	} else if args["get"] != false {
+	} else if args["get"] == true {
 		return runEnvGet(args, client)
 	}
 

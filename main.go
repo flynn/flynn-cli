@@ -77,9 +77,9 @@ var commands = []*Command{
 	cmdRouteRemove,
 	cmdProviders,
 	cmdResourceAdd,
-	cmdKeys,
-	cmdKeyAdd,
-	cmdKeyRemove,
+	//cmdKeys,
+	//cmdKeyAdd,
+	//cmdKeyRemove,
 	cmdReleaseAddDocker,
 	//cmdVersion,
 	//cmdHelp,
@@ -117,9 +117,7 @@ Commands:
    route-remove        remove a route
    providers           list resource providers
    resource-add        provision a new resource
-   keys                list ssh public keys
-   key-add             add ssh public key
-   key-remove          remove an ssh public key
+   key                 manage SSH public keys
    release-add-docker  add a docker image release
    version             show flynn version
 
@@ -208,6 +206,8 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 		return runLog(argv, client)
 	case "env":
 		return runEnv(argv, client)
+	case "key":
+		return runKey(argv, client)
 	case "kill":
 		return runKill(argv, client)
 	}
