@@ -7,23 +7,36 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/docopt/docopt-go"
 	"github.com/BurntSushi/toml"
 	"github.com/flynn/flynn-controller/client"
 )
 
+func runCluster(argv []string, client *controller.Client) error {
+	usage := `usage: flynn cluster
+       flynn cluster add [-g <githost>] [-p <tlspin>] <cluster-name> <url> <key>
+       flynn cluster remove <cluster-name>
 
-var cmdServers = &Command{
-	Run:      runServers,
-	Usage:    "servers",
-	Short:    "list servers",
-	Long:     `List all servers in the ~/.flynnrc configuration file`,
-	NoClient: true,
-}
+Manage clusters in the ~/.flynnrc configuration file.
 
-func runServers(cmd *Command, args []string, client *controller.Client) error {
-	if len(args) != 0 {
-		cmd.printUsage(true)
+Options:
+   -g, --git-host <githost>  git host (if host differs from api URL host)
+   -p, --tls-pin <tlspin>    SHA256 of the server's TLS cert (useful if it is self-signed)
+
+Commands:
+   With no arguments, shows a list of clusters.
+
+   add     adds a cluster to the ~/.flynnrc configuration file
+   remove  removes a cluster from the ~/.flynnrc configuration file
+`
+	args, _ := docopt.Parse(usage, argv, true, "", false)
+
+	if args["add"] == true {
+		return runClusterAdd(args, client)
+	} else if args["remove"] == true {
+		return runClusterRemove(args, client)
 	}
+
 	if err := readConfig(); err != nil {
 		return err
 	}
@@ -38,35 +51,24 @@ func runServers(cmd *Command, args []string, client *controller.Client) error {
 	return nil
 }
 
-
-var cmdServerAdd = &Command{
-	Run:      runServerAdd,
-	Usage:    "server-add [-g <githost>] [-p <tlspin>] <server-name> <url> <key>",
-	Short:    "add a server",
-	Long:     `Command server-add adds a server to the ~/.flynnrc configuration file`,
-	NoClient: true,
-}
-
-var serverGitHost string
-var serverTLSPin string
-
-func init() {
-	cmdServerAdd.Flag.StringVarP(&serverGitHost, "git-host", "g", "", "git host (if host differs from api URL host)")
-	cmdServerAdd.Flag.StringVarP(&serverTLSPin, "tls-pin", "p", "", "SHA256 of the server's TLS cert (useful if it is self-signed)")
-}
-
-func runServerAdd(cmd *Command, args []string, client *controller.Client) error {
-	if len(args) != 3 {
-		cmd.printUsage(true)
-	}
+func runClusterAdd(args map[string]interface{}, client *controller.Client) error {
 	if err := readConfig(); err != nil {
 		return err
 	}
 
+	var serverGitHost string;
+	if args["--git-host"] != nil {
+		serverGitHost = args["--git-host"].(string)
+	}
+	var serverTLSPin string;
+	if args["--tls-pin"] != nil {
+		serverGitHost = args["--tls-pin"].(string)
+	}
+
 	s := &ServerConfig{
-		Name:    args[0],
-		URL:     args[1],
-		Key:     args[2],
+		Name:    args["<cluster-name>"].(string),
+		URL:     args["<url>"].(string),
+		Key:     args["<key>"].(string),
 		GitHost: serverGitHost,
 		TLSPin:  serverTLSPin,
 	}
@@ -110,23 +112,12 @@ func runServerAdd(cmd *Command, args []string, client *controller.Client) error 
 	return nil
 }
 
-var cmdServerRemove = &Command{
-	Run:      runServerRemove,
-	Usage:    "server-remove <server-name>",
-	Short:    "remove a server",
-	Long:     `Command server-remove removes a server from the ~/.flynnrc configuration file`,
-	NoClient: true,
-}
-
-func runServerRemove(cmd *Command, args []string, client *controller.Client) error {
-	if len(args) != 1 {
-		cmd.printUsage(true)
-	}
+func runClusterRemove(args map[string]interface{}, client *controller.Client) error {
 	if err := readConfig(); err != nil {
 		return err
 	}
 
-	name := args[0]
+	name := args["<cluster-name>"].(string)
 
 	for i, s := range config.Servers {
 		if s.Name == name {

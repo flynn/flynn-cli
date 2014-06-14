@@ -28,9 +28,7 @@ Options:
 
 	runDetached := args["--detached"].(bool)
 	var runRelease string
-	if args["-r"] == nil {
-		runRelease = ""
-	} else {
+	if args["-r"] != nil {
 		runRelease = args["-r"].(string)
 	}
 

@@ -59,9 +59,9 @@ func (c *Command) List() bool {
 
 // Running `flynn help` will list commands in this order.
 var commands = []*Command{
-	cmdServers,
-	cmdServerAdd,
-	cmdServerRemove,
+	//cmdServers,
+	//cmdServerAdd,
+	//cmdServerRemove,
 	//cmdCreate,
 	//cmdApps,
 	//cmdPs,
@@ -101,9 +101,7 @@ Options:
 
 Commands:
    help                show usage for a specific command
-   cluster             list clusters
-   cluster-add         add a cluster
-   cluster-remove      remove a cluster
+   cluster             manage clusters
    create              create an app
    apps                list apps
    ps                  list jobs
@@ -210,6 +208,8 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 		return runKey(argv, client)
 	case "kill":
 		return runKill(argv, client)
+	case "cluster":
+		return runCluster(argv, client)
 	}
 
 	return fmt.Errorf("%s is not a flynn command. See 'flynn --help'", cmd)
