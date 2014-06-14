@@ -126,6 +126,16 @@ See 'flynn help <command>' for more information on a specific command.
 	cmd := args["<command>"].(string)
 	cmdArgs := args["<args>"].([]string)
 
+	if cmd == "help" {
+		if len(cmdArgs) == 0 { // `flynn help`
+			fmt.Println(usage)
+			return
+		} else { // `flynn help <command>`
+			cmd = cmdArgs[0]
+			cmdArgs = make([]string, 1)
+			cmdArgs[0] = "--help"
+		}
+	}
 	// Run the update command as early as possible to avoid the possibility of
 	// installations being stranded without updates due to errors in other code
 	if cmd == "update" {
@@ -178,14 +188,6 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 	argv := make([]string, 1)
 	argv[0] = cmd
 	argv = append(argv, args...)
-
-	if cmd == "help" {
-		cmd = argv[1]
-
-		argv = make([]string, 1)
-		argv[0] = cmd
-		argv = append(argv, "--help")
-	}
 
 	switch cmd {
 	case "version":
