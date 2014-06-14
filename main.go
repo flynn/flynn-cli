@@ -59,13 +59,15 @@ func (c *Command) List() bool {
 
 // Running `flynn help` will list commands in this order.
 var commands = []*Command{
+	cmdServers,
 	cmdServerAdd,
+	cmdServerRemove,
 	//cmdCreate,
 	//cmdApps,
 	//cmdPs,
 	//cmdLog,
 	//cmdScale,
-	cmdRun,
+	//cmdRun,
 	//cmdEnv,
 	//cmdEnvSet,
 	//cmdEnvGet,
@@ -86,7 +88,6 @@ var commands = []*Command{
 var (
 	flagServer = os.Getenv("FLYNN_SERVER")
 	flagApp    string
-	flagLong   bool
 )
 
 func main() {
@@ -99,14 +100,6 @@ Options:
    -h, --help
 
 Commands:
-   add        Add file contents to the index
-   branch     List, create, or delete branches
-   checkout   Checkout a branch or paths to the working tree
-   clone      Clone a repository into a new directory
-   commit     Record changes to the repository
-   push       Update remote refs along with associated objects
-   remote     Manage set of tracked repositories
-
    help                show usage for a specific command
    cluster             list clusters
    cluster-add         add a cluster
@@ -209,6 +202,8 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 		return runPs(argv, client)
 	case "scale":
 		return runScale(argv, client)
+	case "run":
+		return runRun(argv, client)
 	case "log":
 		return runLog(argv, client)
 	case "env":

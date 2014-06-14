@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"fmt"
 
 	"github.com/docopt/docopt-go"
 	"github.com/flynn/flynn-controller/client"
@@ -21,7 +22,7 @@ Options:
 
 Example:
 
-	$ flynn scale web=2 worker=5
+  $ flynn scale web=2 worker=5
 `
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
@@ -55,11 +56,11 @@ Example:
 	for _, arg := range args["<type>=<qty>"].([]string) {
 		i := strings.IndexRune(arg, '=')
 		if i < 0 {
-			//cmd.printUsage(true)
+			fmt.Println(usage)
 		}
 		val, err := strconv.Atoi(arg[i+1:])
 		if err != nil {
-			//cmd.printUsage(true)
+			fmt.Println(usage)
 		}
 		formation.Processes[arg[:i]] = val
 	}
