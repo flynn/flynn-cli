@@ -44,9 +44,9 @@ Examples:
 `
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-	if args["set"] == true {
+	if args["add"] == true {
 		return runKeyAdd(args, client)
-	} else if args["unset"] == true {
+	} else if args["remove"] == true {
 		return runKeyRemove(args, client)
 	}
 
