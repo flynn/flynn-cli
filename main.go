@@ -75,8 +75,8 @@ var commands = []*Command{
 	//cmdRoutes,
 	//cmdRouteAddHTTP,
 	//cmdRouteRemove,
-	cmdProviders,
-	cmdResourceAdd,
+	//cmdProviders,
+	//cmdResourceAdd,
 	//cmdKeys,
 	//cmdKeyAdd,
 	//cmdKeyRemove,
@@ -111,8 +111,8 @@ Commands:
    run                 run a job
    env                 manage env variables
    route               manage routes
-   providers           list resource providers
-   resource-add        provision a new resource
+   provider            manage resource providers
+   resource            provision a new resource
    key                 manage SSH public keys
    release-add-docker  add a docker image release
    version             show flynn version
@@ -211,6 +211,10 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 		return runCluster(argv, client)
 	case "route":
 		return runRoute(argv, client)
+	case "resource":
+		return runResource(argv, client)
+	case "provider":
+		return runProvider(argv, client)
 	}
 
 	return fmt.Errorf("%s is not a flynn command. See 'flynn help'", cmd)
