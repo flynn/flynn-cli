@@ -13,7 +13,7 @@ func runResource(argv []string, client *controller.Client) error {
 
 Manage resources for the app.
 
-Command:
+Commands:
    add  provisions a new resource for the app using <provider>.
 	`
 	args, _ := docopt.Parse(usage, argv, true, "", false)

@@ -80,7 +80,7 @@ var commands = []*Command{
 	//cmdKeys,
 	//cmdKeyAdd,
 	//cmdKeyRemove,
-	cmdReleaseAddDocker,
+	//cmdReleaseAddDocker,
 	//cmdVersion,
 	//cmdHelp,
 }
@@ -114,7 +114,7 @@ Commands:
    provider            manage resource providers
    resource            provision a new resource
    key                 manage SSH public keys
-   release-add-docker  add a docker image release
+   release             add a docker image release
    version             show flynn version
 
 See 'flynn help <command>' for more information on a specific command.
@@ -215,6 +215,8 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 		return runResource(argv, client)
 	case "provider":
 		return runProvider(argv, client)
+	case "release":
+		return runRelease(argv, client)
 	}
 
 	return fmt.Errorf("%s is not a flynn command. See 'flynn help'", cmd)
