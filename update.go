@@ -23,7 +23,7 @@ import (
 	"github.com/kr/binarydist"
 )
 
-var cmdUpdate = &Command{
+/*var cmdUpdate = &Command{
 	Run:      runUpdate,
 	Usage:    "update",
 	NoClient: true,
@@ -32,9 +32,9 @@ Update downloads and installs the next version of flynn-cli.
 
 This command is unlisted, since users never have to run it directly.
 `,
-}
+}*/
 
-func runUpdate(cmd *Command, args []string, client *controller.Client) error {
+func runUpdate(args []string, client *controller.Client) error {
 	if updater == nil {
 		return errors.New("Dev builds don't support auto-updates")
 	}

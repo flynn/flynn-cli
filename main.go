@@ -137,7 +137,7 @@ See 'flynn help <command>' for more information on a specific command.
 	// Run the update command as early as possible to avoid the possibility of
 	// installations being stranded without updates due to errors in other code
 	if cmd == "update" {
-		//cmdUpdate.Run(cmdUpdate, args, nil)
+		runUpdate(cmdArgs, nil)
 		return
 	} else if updater != nil {
 		defer updater.backgroundRun() // doesn't run if os.Exit is called
@@ -214,7 +214,7 @@ func runCommand(cmd string, args []string, client *controller.Client) (err error
 		return runRoute(argv, client)
 	}
 
-	return fmt.Errorf("%s is not a flynn command. See 'flynn --help'", cmd)
+	return fmt.Errorf("%s is not a flynn command. See 'flynn help'", cmd)
 }
 
 type Config struct {
