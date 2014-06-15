@@ -114,24 +114,25 @@ func runClusterRemove(args *docopt.Args, client *controller.Client) error {
 	name := args.String["<cluster-name>"]
 
 	for i, s := range config.Servers {
-		if s.Name == name {
-			config.Servers = append(config.Servers[:i], config.Servers[i+1:]...)
+		if s.Name != name {
+			continue
+		}
+		config.Servers = append(config.Servers[:i], config.Servers[i+1:]...)
 
-			f, err := os.Create(configPath())
-			if err != nil {
+		f, err := os.Create(configPath())
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		if len(config.Servers) != 0 {
+			if err := toml.NewEncoder(f).Encode(config); err != nil {
 				return err
 			}
-			defer f.Close()
-
-			if len(config.Servers) != 0 {
-				if err := toml.NewEncoder(f).Encode(config); err != nil {
-					return err
-				}
-			}
-
-			log.Printf("Server %q removed.", s.Name)
-			return nil
 		}
+
+		log.Printf("Server %q removed.", s.Name)
+		return nil
 	}
 	return nil
 }
