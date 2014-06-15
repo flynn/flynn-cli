@@ -7,83 +7,14 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 	"path/filepath"
 	"runtime"
 	"text/tabwriter"
 
 	"github.com/flynn/go-docopt"
-	"github.com/bgentry/pflag"
 	"github.com/BurntSushi/toml"
 	"github.com/flynn/flynn-controller/client"
 )
-
-type Command struct {
-	// args does not include the command name
-	Run  func(cmd *Command, args []string, client *controller.Client) error
-	Flag pflag.FlagSet
-
-	Usage string // first word is the command name
-	Short string // `flynn help` output
-	Long  string // `flynn help cmd` output
-
-	NoClient bool
-}
-
-func (c *Command) printUsage(errExit bool) {
-	if c.Runnable() {
-		fmt.Printf("Usage: %s %s\n\n", os.Args[0], c.Usage)
-	}
-	fmt.Println(strings.Trim(c.Long, "\n"))
-	if errExit {
-		os.Exit(2)
-	}
-}
-
-func (c *Command) Name() string {
-	name := c.Usage
-	i := strings.Index(name, " ")
-	if i >= 0 {
-		name = name[:i]
-	}
-	return name
-}
-
-func (c *Command) Runnable() bool {
-	return c.Run != nil
-}
-
-func (c *Command) List() bool {
-	return c.Short != ""
-}
-
-// Running `flynn help` will list commands in this order.
-var commands = []*Command{
-	//cmdServers,
-	//cmdServerAdd,
-	//cmdServerRemove,
-	//cmdCreate,
-	//cmdApps,
-	//cmdPs,
-	//cmdLog,
-	//cmdScale,
-	//cmdRun,
-	//cmdEnv,
-	//cmdEnvSet,
-	//cmdEnvGet,
-	//cmdEnvUnset,
-	//cmdRoutes,
-	//cmdRouteAddHTTP,
-	//cmdRouteRemove,
-	//cmdProviders,
-	//cmdResourceAdd,
-	//cmdKeys,
-	//cmdKeyAdd,
-	//cmdKeyRemove,
-	//cmdReleaseAddDocker,
-	//cmdVersion,
-	//cmdHelp,
-}
 
 var (
 	flagServer = os.Getenv("FLYNN_SERVER")
