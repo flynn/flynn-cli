@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 )
 

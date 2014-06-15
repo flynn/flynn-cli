@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 	ct "github.com/flynn/flynn-controller/types"
 )
@@ -34,15 +34,13 @@ Commands:
 `
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-	if args["--process-type"] != nil {
-		envProc = args["--process-type"].(string)
-	}
+	envProc = args.String["--process-type"]
 
-	if args["set"] == true {
+	if args.Bool["set"] {
 		return runEnvSet(args, client)
-	} else if args["unset"] == true {
+	} else if args.Bool["unset"] {
 		return runEnvUnset(args, client)
-	} else if args["get"] == true {
+	} else if args.Bool["get"] {
 		return runEnvGet(args, client)
 	}
 
@@ -75,8 +73,8 @@ Commands:
 	return nil
 }
 
-func runEnvSet(args map[string]interface{}, client *controller.Client) error {
-	pairs := args["<var>=<val>"].([]string)
+func runEnvSet(args *docopt.Args, client *controller.Client) error {
+	pairs := args.All["<var>=<val>"].([]string)
 	env := make(map[string]*string, len(pairs))
 	for _, s := range pairs {
 		v := strings.SplitN(s, "=", 2)
@@ -93,8 +91,8 @@ func runEnvSet(args map[string]interface{}, client *controller.Client) error {
 	return nil
 }
 
-func runEnvUnset(args map[string]interface{}, client *controller.Client) error {
-	vars := args["<var>"].([]string)
+func runEnvUnset(args *docopt.Args, client *controller.Client) error {
+	vars := args.All["<var>"].([]string)
 	env := make(map[string]*string, len(vars))
 	for _, s := range vars {
 		env[s] = nil
@@ -107,8 +105,8 @@ func runEnvUnset(args map[string]interface{}, client *controller.Client) error {
 	return nil
 }
 
-func runEnvGet(args map[string]interface{}, client *controller.Client) error {
-	arg := args["<var>"].([]string)[0]
+func runEnvGet(args *docopt.Args, client *controller.Client) error {
+	arg := args.All["<var>"].([]string)[0]
 	release, err := client.GetAppRelease(mustApp())
 	if err == controller.ErrNotFound {
 		return errors.New("no app release found")

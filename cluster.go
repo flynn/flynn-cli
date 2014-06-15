@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/BurntSushi/toml"
 	"github.com/flynn/flynn-controller/client"
 )
@@ -31,9 +31,9 @@ Commands:
 `
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-	if args["add"] == true {
+	if args.Bool["add"] {
 		return runClusterAdd(args, client)
-	} else if args["remove"] == true {
+	} else if args.Bool["remove"] {
 		return runClusterRemove(args, client)
 	}
 
@@ -51,24 +51,18 @@ Commands:
 	return nil
 }
 
-func runClusterAdd(args map[string]interface{}, client *controller.Client) error {
+func runClusterAdd(args *docopt.Args, client *controller.Client) error {
 	if err := readConfig(); err != nil {
 		return err
 	}
 
-	var serverGitHost string;
-	if args["--git-host"] != nil {
-		serverGitHost = args["--git-host"].(string)
-	}
-	var serverTLSPin string;
-	if args["--tls-pin"] != nil {
-		serverGitHost = args["--tls-pin"].(string)
-	}
+	serverGitHost := args.String["--git-host"]
+	serverTLSPin := args.String["--tls-pin"]
 
 	s := &ServerConfig{
-		Name:    args["<cluster-name>"].(string),
-		URL:     args["<url>"].(string),
-		Key:     args["<key>"].(string),
+		Name:    args.String["<cluster-name>"],
+		URL:     args.String["<url>"],
+		Key:     args.String["<key>"],
 		GitHost: serverGitHost,
 		TLSPin:  serverTLSPin,
 	}
@@ -112,12 +106,12 @@ func runClusterAdd(args map[string]interface{}, client *controller.Client) error
 	return nil
 }
 
-func runClusterRemove(args map[string]interface{}, client *controller.Client) error {
+func runClusterRemove(args *docopt.Args, client *controller.Client) error {
 	if err := readConfig(); err != nil {
 		return err
 	}
 
-	name := args["<cluster-name>"].(string)
+	name := args.String["<cluster-name>"]
 
 	for i, s := range config.Servers {
 		if s.Name == name {

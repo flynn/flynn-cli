@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 	ct "github.com/flynn/flynn-controller/types"
 	"github.com/flynn/go-flynn/demultiplex"
@@ -26,11 +26,8 @@ Options:
 
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-	runDetached := args["--detached"].(bool)
-	var runRelease string
-	if args["-r"] != nil {
-		runRelease = args["-r"].(string)
-	}
+	runDetached := args.Bool["--detached"]
+	runRelease := args.String["-r"]
 
 	if runRelease == "" {
 		release, err := client.GetAppRelease(mustApp())
@@ -43,7 +40,7 @@ Options:
 		runRelease = release.ID
 	}
 	req := &ct.NewJob{
-		Cmd:       args["<argument>"].([]string),
+		Cmd:       args.All["<argument>"].([]string),
 		TTY:       term.IsTerminal(os.Stdin) && term.IsTerminal(os.Stdout) && !runDetached,
 		ReleaseID: runRelease,
 	}

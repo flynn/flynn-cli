@@ -12,7 +12,7 @@ import (
 	"runtime"
 	"text/tabwriter"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/bgentry/pflag"
 	"github.com/BurntSushi/toml"
 	"github.com/flynn/flynn-controller/client"
@@ -121,8 +121,8 @@ See 'flynn help <command>' for more information on a specific command.
 	`
 	args, _ := docopt.Parse(usage, nil, true, Version, true)
 
-	cmd := args["<command>"].(string)
-	cmdArgs := args["<args>"].([]string)
+	cmd := args.String["<command>"]
+	cmdArgs := args.All["<args>"].([]string)
 
 	if cmd == "help" {
 		if len(cmdArgs) == 0 { // `flynn help`
@@ -143,9 +143,8 @@ See 'flynn help <command>' for more information on a specific command.
 		defer updater.backgroundRun() // doesn't run if os.Exit is called
 	}
 
-	if args["-a"] != nil {
-		flagApp = args["-a"].(string)
-
+	flagApp = args.String["-a"]
+	if flagApp != "" {
 		if err := readConfig(); err != nil {
 			log.Fatal(err)
 		}

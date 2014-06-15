@@ -6,7 +6,7 @@ import (
 	"strings"
 	"fmt"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 	ct "github.com/flynn/flynn-controller/types"
 )
@@ -26,7 +26,7 @@ Example:
 `
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-	scaleRelease := args["--release"].(string)
+	scaleRelease := args.String["--release"]
 
 	if scaleRelease == "" {
 		release, err := client.GetAppRelease(mustApp())
@@ -53,7 +53,7 @@ Example:
 		formation.Processes = make(map[string]int)
 	}
 
-	for _, arg := range args["<type>=<qty>"].([]string) {
+	for _, arg := range args.All["<type>=<qty>"].([]string) {
 		i := strings.IndexRune(arg, '=')
 		if i < 0 {
 			fmt.Println(usage)

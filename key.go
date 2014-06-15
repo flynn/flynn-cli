@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 )
 
@@ -44,9 +44,9 @@ Examples:
 `
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-	if args["add"] == true {
+	if args.Bool["add"] {
 		return runKeyAdd(args, client)
-	} else if args["remove"] == true {
+	} else if args.Bool["remove"] {
 		return runKeyRemove(args, client)
 	}
 
@@ -75,11 +75,9 @@ func formatKeyID(s string) string {
 	return string(buf)
 }
 
-func runKeyAdd(args map[string]interface{}, client *controller.Client) error {
-	var sshPubKeyPath string
-	if args["<public-key-file>"] != nil {
-		sshPubKeyPath = args["<public-key-file>"].(string)
-	}
+func runKeyAdd(args *docopt.Args, client *controller.Client) error {
+	sshPubKeyPath := args.String["<public-key-file>"]
+
 	keys, err := findKeys(sshPubKeyPath)
 	if err != nil {
 		if _, ok := err.(privKeyError); ok {
@@ -143,8 +141,8 @@ func (e privKeyError) Error() string {
 	return "appears to be a private key: " + string(e)
 }
 
-func runKeyRemove(args map[string]interface{}, client *controller.Client) error {
-	fingerprint := args["<fingerprint>"].(string)
+func runKeyRemove(args *docopt.Args, client *controller.Client) error {
+	fingerprint := args.String["<fingerprint>"]
 
 	if err := client.DeleteKey(fingerprint); err != nil {
 		return err

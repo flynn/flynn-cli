@@ -4,7 +4,7 @@ import (
 	"log"
 	"os/exec"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 	ct "github.com/flynn/flynn-controller/types"
 )
@@ -17,9 +17,7 @@ Create an application in Flynn.
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
 	app := &ct.App{}
-	if args["<name>"] != nil {
-		app.Name = args["<name>"].(string)
-	}
+	app.Name = args.String["<name>"]
 
 	if err := client.CreateApp(app); err != nil {
 		return err

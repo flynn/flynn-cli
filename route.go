@@ -9,7 +9,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 	"github.com/flynn/strowger/types"
 )
@@ -35,13 +35,13 @@ Commands:
 `
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-	if args["add"] == true {
-		if args["-t"].(string) == "http" {
+	if args.Bool["add"] {
+		if args.String["-t"] == "http" {
 			return runRouteAddHTTP(args, client)
 		} else {
-			return fmt.Errorf("Route type %s not supported.", args["-t"])
+			return fmt.Errorf("Route type %s not supported.", args.String["-t"])
 		}
-	} else if args["remove"] == true {
+	} else if args.Bool["remove"] {
 		return runRouteRemove(args, client)
 	}
 
@@ -75,23 +75,23 @@ Commands:
 	return nil
 }
 
-func runRouteAddHTTP(args map[string]interface{}, client *controller.Client) error {
+func runRouteAddHTTP(args *docopt.Args, client *controller.Client) error {
 	var tlsCert []byte
 	var tlsKey []byte
 
 	var routeHTTPService string
-	if args["--service"] == nil {
+	if args.String["--service"] == "" {
 		routeHTTPService = mustApp() + "-web"
 	} else {
-		routeHTTPService = args["--service"].(string)
+		routeHTTPService = args.String["--service"]
 	}
 
-	if args["tls-cert"] != nil && args["tls-key"] != nil {
+	if args.String["tls-cert"] != "" && args.String["tls-key"] != "" {
 		var stdin []byte
 		var err error
 
-		tlsCertPath := args["tls-cert"].(string)
-		tlsKeyPath := args["tls-key"].(string)
+		tlsCertPath := args.String["tls-cert"]
+		tlsKeyPath := args.String["tls-key"]
 
 		if tlsCertPath == "-" || tlsKeyPath == "-" {
 			stdin, err = ioutil.ReadAll(os.Stdin)
@@ -108,13 +108,13 @@ func runRouteAddHTTP(args map[string]interface{}, client *controller.Client) err
 		if err != nil {
 			return errors.New("Failed to read TLS Key")
 		}
-	} else if args["tls-cert"] != nil || args["tls-key"] != nil  {
+	} else if args.String["tls-cert"] != "" || args.String["tls-key"] != ""  {
 		return errors.New("Both the TLS certificate AND private key need to be specified")
 	}
 
 	hr := &strowger.HTTPRoute{
 		Service: routeHTTPService,
-		Domain:  args["<domain>"].(string),
+		Domain:  args.String["<domain>"],
 		TLSCert: string(tlsCert),
 		TLSKey:  string(tlsKey),
 	}
@@ -147,8 +147,8 @@ func readPEM(typ string, path string, stdin []byte) ([]byte, error) {
 	return ioutil.ReadFile(path)
 }
 
-func runRouteRemove(args map[string]interface{}, client *controller.Client) error {
-	routeID := args["<id>"].(string)
+func runRouteRemove(args *docopt.Args, client *controller.Client) error {
+	routeID := args.String["<id>"]
 
 	if err := client.DeleteRoute(mustApp(), routeID); err != nil {
 		return err

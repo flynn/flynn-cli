@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/docopt/docopt-go"
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 	"github.com/flynn/go-flynn/demultiplex"
 )
@@ -19,12 +19,12 @@ Options:
 	`
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
-	rc, err := client.GetJobLog(mustApp(), args["<job>"].(string))
+	rc, err := client.GetJobLog(mustApp(), args.String["<job>"])
 	if err != nil {
 		return err
 	}
 	var stderr io.Writer
-	if args["--split-stderr"] != nil {
+	if args.Bool["--split-stderr"] {
 		stderr = os.Stderr
 	}
 	demultiplex.Copy(os.Stdout, stderr, rc)
