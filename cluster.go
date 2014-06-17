@@ -9,10 +9,9 @@ import (
 
 	"github.com/flynn/go-docopt"
 	"github.com/BurntSushi/toml"
-	"github.com/flynn/flynn-controller/client"
 )
 
-func runCluster(argv []string, client *controller.Client) error {
+func runCluster(argv []string) error {
 	usage := `usage: flynn cluster
        flynn cluster add [-g <githost>] [-p <tlspin>] <cluster-name> <url> <key>
        flynn cluster remove <cluster-name>
@@ -32,9 +31,9 @@ Commands:
 	args, _ := docopt.Parse(usage, argv, true, "", false)
 
 	if args.Bool["add"] {
-		return runClusterAdd(args, client)
+		return runClusterAdd(args)
 	} else if args.Bool["remove"] {
-		return runClusterRemove(args, client)
+		return runClusterRemove(args)
 	}
 
 	if err := readConfig(); err != nil {
@@ -51,7 +50,7 @@ Commands:
 	return nil
 }
 
-func runClusterAdd(args *docopt.Args, client *controller.Client) error {
+func runClusterAdd(args *docopt.Args) error {
 	if err := readConfig(); err != nil {
 		return err
 	}
@@ -106,7 +105,7 @@ func runClusterAdd(args *docopt.Args, client *controller.Client) error {
 	return nil
 }
 
-func runClusterRemove(args *docopt.Args, client *controller.Client) error {
+func runClusterRemove(args *docopt.Args) error {
 	if err := readConfig(); err != nil {
 		return err
 	}

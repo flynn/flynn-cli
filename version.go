@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/flynn/go-docopt"
-	"github.com/flynn/flynn-controller/client"
 )
 
 // NoClient
-func runVersion(argv []string, client *controller.Client) error {
+func runVersion(argv []string) error {
 	usage := `usage: flynn version
 
 Show flynn version string.

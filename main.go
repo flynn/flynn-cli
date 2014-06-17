@@ -68,7 +68,7 @@ See 'flynn help <command>' for more information on a specific command.
 	// Run the update command as early as possible to avoid the possibility of
 	// installations being stranded without updates due to errors in other code
 	if cmd == "update" {
-		runUpdate(cmdArgs, nil)
+		runUpdate(cmdArgs)
 		return
 	} else if updater != nil {
 		defer updater.backgroundRun() // doesn't run if os.Exit is called
@@ -86,8 +86,38 @@ See 'flynn help <command>' for more information on a specific command.
 		}
 	}
 
-	var client *controller.Client
-	//if !cmd.NoClient {
+	if err := runCommand(cmd, cmdArgs); err != nil {
+		log.Fatal(err)
+		return
+	}
+}
+
+var commands = map[string]interface{} {
+	"version": runVersion,
+	"create": runCreate,
+	"apps": runApps,
+	"ps": runPs,
+	"scale": runScale,
+	"run": runRun,
+	"log": runLog,
+	"env": runEnv,
+	"key": runKey,
+	"kill": runKill,
+	"cluster": runCluster,
+	"route": runRoute,
+	"resource": runResource,
+	"provider": runProvider,
+	"release": runRelease,
+}
+
+func runCommand(cmd string, args []string) (err error) {
+	argv := make([]string, 1)
+	argv[0] = cmd
+	argv = append(argv, args...)
+
+	if f, ok := commands[cmd].(func([]string, *controller.Client) error); ok {
+		// create client and run command
+		var client *controller.Client
 		server, err := server()
 		if err != nil {
 			log.Fatal(err)
@@ -104,50 +134,10 @@ See 'flynn help <command>' for more information on a specific command.
 		if err != nil {
 			log.Fatal(err)
 		}
-	//}
 
-	if err := runCommand(cmd, cmdArgs, client); err != nil {
-		log.Fatal(err)
-		return
-	}
-}
-
-func runCommand(cmd string, args []string, client *controller.Client) (err error) {
-	argv := make([]string, 1)
-	argv[0] = cmd
-	argv = append(argv, args...)
-
-	switch cmd {
-	case "version":
-		return runVersion(argv, client)
-	case "create":
-		return runCreate(argv, client)
-	case "apps":
-		return runApps(argv, client)
-	case "ps":
-		return runPs(argv, client)
-	case "scale":
-		return runScale(argv, client)
-	case "run":
-		return runRun(argv, client)
-	case "log":
-		return runLog(argv, client)
-	case "env":
-		return runEnv(argv, client)
-	case "key":
-		return runKey(argv, client)
-	case "kill":
-		return runKill(argv, client)
-	case "cluster":
-		return runCluster(argv, client)
-	case "route":
-		return runRoute(argv, client)
-	case "resource":
-		return runResource(argv, client)
-	case "provider":
-		return runProvider(argv, client)
-	case "release":
-		return runRelease(argv, client)
+		return f(argv, client)
+	} else if f, ok := commands[cmd].(func([]string) error); ok {
+		return f(argv)
 	}
 
 	return fmt.Errorf("%s is not a flynn command. See 'flynn help'", cmd)

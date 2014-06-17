@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"bitbucket.org/kardianos/osext"
-	"github.com/flynn/flynn-controller/client"
 	"github.com/inconshreveable/go-update"
 	"github.com/kr/binarydist"
 )
@@ -34,7 +33,7 @@ This command is unlisted, since users never have to run it directly.
 `,
 }*/
 
-func runUpdate(args []string, client *controller.Client) error {
+func runUpdate(args []string) error {
 	if updater == nil {
 		return errors.New("Dev builds don't support auto-updates")
 	}
