@@ -1,6 +1,6 @@
 {
-	"ImportPath": "github.com/flynn/flynn-cli",
-	"GoVersion": "go1.2.1",
+	"ImportPath": "github.com/archSeer/flynn-cli",
+	"GoVersion": "go1.3rc1",
 	"Deps": [
 		{
 			"ImportPath": "bitbucket.org/kardianos/osext",
@@ -10,10 +10,6 @@
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
 			"Rev": "f87ce853111478914f0bcffa34d43a93643e6eda"
-		},
-		{
-			"ImportPath": "github.com/bgentry/pflag",
-			"Rev": "b008717215c7236e20ca2faaf805e54ba6c1d208"
 		},
 		{
 			"ImportPath": "github.com/coreos/go-etcd/etcd",
@@ -47,6 +43,11 @@
 		{
 			"ImportPath": "github.com/flynn/go-dockerclient",
 			"Rev": "7293e94689ede4992e94fdcf1e1152b5947b526b"
+		},
+		{
+			"ImportPath": "github.com/flynn/go-docopt",
+			"Comment": "0.6.1-rc2-25-gc4d72bb",
+			"Rev": "c4d72bb6e19016aebcf611fe19376d46f85f1752"
 		},
 		{
 			"ImportPath": "github.com/flynn/go-flynn/attempt",
