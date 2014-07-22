@@ -11,9 +11,9 @@ import (
 	"runtime"
 	"text/tabwriter"
 
-	"github.com/flynn/go-docopt"
 	"github.com/BurntSushi/toml"
 	"github.com/flynn/flynn-controller/client"
+	"github.com/flynn/go-docopt"
 )
 
 var (
@@ -46,6 +46,7 @@ Commands:
    resource            provision a new resource
    key                 manage SSH public keys
    release             add a docker image release
+   update              update flynn components
    version             show flynn version
 
 See 'flynn help <command>' for more information on a specific command.
@@ -67,8 +68,8 @@ See 'flynn help <command>' for more information on a specific command.
 	}
 	// Run the update command as early as possible to avoid the possibility of
 	// installations being stranded without updates due to errors in other code
-	if cmd == "update" {
-		runUpdate(cmdArgs)
+	if cmd == "updater" {
+		runUpdater(cmdArgs)
 		return
 	} else if updater != nil {
 		defer updater.backgroundRun() // doesn't run if os.Exit is called
@@ -92,22 +93,23 @@ See 'flynn help <command>' for more information on a specific command.
 	}
 }
 
-var commands = map[string]interface{} {
-	"version": runVersion,
-	"create": runCreate,
-	"apps": runApps,
-	"ps": runPs,
-	"scale": runScale,
-	"run": runRun,
-	"log": runLog,
-	"env": runEnv,
-	"key": runKey,
-	"kill": runKill,
-	"cluster": runCluster,
-	"route": runRoute,
+var commands = map[string]interface{}{
+	"version":  runVersion,
+	"create":   runCreate,
+	"apps":     runApps,
+	"ps":       runPs,
+	"scale":    runScale,
+	"run":      runRun,
+	"log":      runLog,
+	"env":      runEnv,
+	"key":      runKey,
+	"kill":     runKill,
+	"cluster":  runCluster,
+	"route":    runRoute,
 	"resource": runResource,
 	"provider": runProvider,
-	"release": runRelease,
+	"release":  runRelease,
+	"update":   runUpdate,
 }
 
 func runCommand(cmd string, args []string) (err error) {
