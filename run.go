@@ -7,33 +7,28 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 	ct "github.com/flynn/flynn-controller/types"
 	"github.com/flynn/go-flynn/demultiplex"
 	"github.com/heroku/hk/term"
 )
 
-var (
-	runDetached bool
-	runRelease  string
-)
+func runRun(argv []string, client *controller.Client) error {
+	usage := `usage: flynn run [-d] [-r <release>] <command> [<argument>...]
 
-var cmdRun = &Command{
-	Run:   runRun,
-	Usage: "run [-d] [-r <release>] <command> [<argument>...]",
-	Short: "run a job",
-	Long:  `Run a job`,
-}
+Run a job.
 
-func init() {
-	cmdRun.Flag.BoolVarP(&runDetached, "detached", "d", false, "run job without connecting io streams")
-	cmdRun.Flag.StringVarP(&runRelease, "release", "r", "", "id of release to run (defaults to current app release)")
-}
+Options:
+   -d, --detached  run job without connecting io streams
+   -r <release>    id of release to run (defaults to current app release)
+`
 
-func runRun(cmd *Command, args []string, client *controller.Client) error {
-	if len(args) == 0 {
-		cmd.printUsage(true)
-	}
+	args, _ := docopt.Parse(usage, argv, true, "", false)
+
+	runDetached := args.Bool["--detached"]
+	runRelease := args.String["-r"]
+
 	if runRelease == "" {
 		release, err := client.GetAppRelease(mustApp())
 		if err == controller.ErrNotFound {
@@ -45,7 +40,7 @@ func runRun(cmd *Command, args []string, client *controller.Client) error {
 		runRelease = release.ID
 	}
 	req := &ct.NewJob{
-		Cmd:       args,
+		Cmd:       args.All["<argument>"].([]string),
 		TTY:       term.IsTerminal(os.Stdin) && term.IsTerminal(os.Stdout) && !runDetached,
 		ReleaseID: runRelease,
 	}

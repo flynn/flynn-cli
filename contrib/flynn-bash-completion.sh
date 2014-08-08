@@ -4,7 +4,7 @@
 
 _flynn_commands()
 {
-    flynn help commands | cut -f 2 -d ' '
+    flynn help | cut -f 4 -d ' ' -s
 }
 
 _flynn()

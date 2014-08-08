@@ -5,24 +5,38 @@ import (
 	"log"
 	"strings"
 
+	"github.com/flynn/go-docopt"
 	"github.com/flynn/flynn-controller/client"
 	ct "github.com/flynn/flynn-controller/types"
 )
 
-var cmdReleaseAddDocker = &Command{
-	Run:   runReleaseAddDocker,
-	Usage: "release-add-docker <image> <tag>",
-	Short: "add a docker image release",
-	Long:  "Add a release referencing a Docker image",
-}
+func runRelease(argv []string, client *controller.Client) error {
+	usage := `usage: flynn release add [-t <type>] <image> <tag>
 
-func runReleaseAddDocker(cmd *Command, args []string, client *controller.Client) error {
-	if len(args) != 2 {
-		cmd.printUsage(true)
+Manage app releases.
+
+Options:
+   -t <type>  type of the release. Currently only 'docker' is supported. [default: docker]
+Commands:
+   add   add a new release
+	`
+	args, _ := docopt.Parse(usage, argv, true, "", false)
+
+	if args.Bool["add"] {
+		if args.String["-t"] == "docker" {
+			return runReleaseAddDocker(args, client)
+		} else {
+			return fmt.Errorf("Release type %s not supported.", args.String["-t"])
+		}
 	}
 
-	image := args[0]
-	tag := args[1]
+	log.Fatal("Toplevel command not implemented.")
+	return nil
+}
+
+func runReleaseAddDocker(args *docopt.Args, client *controller.Client) error {
+	image := args.String["<image>"]
+	tag := args.String["<tag>"]
 
 	if !strings.Contains(image, ".") {
 		image = "/" + image
